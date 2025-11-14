@@ -60,6 +60,15 @@ def root():
         "docs": "/docs"
     }
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint to verify backend is running"""
+    return {
+        "status": "healthy",
+        "service": "PFMO Backend API",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 
 @app.on_event("startup")
 async def startup_event():
