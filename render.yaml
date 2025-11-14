@@ -15,6 +15,11 @@ services:
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: 30
+      # CORS Origins - Add your frontend URL(s) here
+      # Format: "http://localhost:5173,https://your-app.vercel.app"
+      # Or use "*" to allow all origins (less secure)
+      # - key: BACKEND_CORS_ORIGINS
+      #   value: "*"
     # Link to the database - this automatically sets DATABASE_URL
     database:
       name: pfmo-db

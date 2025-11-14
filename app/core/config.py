@@ -19,8 +19,9 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
 
-    # CORS
-    BACKEND_CORS_ORIGINS: list = ["*"]
+    # CORS - Can be a comma-separated string or list
+    # Examples: "http://localhost:5173,https://pfmo-app.vercel.app" or ["http://localhost:5173"]
+    BACKEND_CORS_ORIGINS: str = "*"  # Default to allow all for development
 
     # First Admin User (for initial setup)
     ADMIN_USERNAME: str = "admin"

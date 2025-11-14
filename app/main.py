@@ -18,10 +18,24 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS Middleware
+# CORS Middleware - Parse origins from environment variable
+
+
+def parse_cors_origins(origins_str: str) -> list:
+    """Parse CORS origins from string (comma-separated) or return wildcard"""
+    if origins_str == "*" or not origins_str:
+        return ["*"]
+    # Split by comma and strip whitespace
+    origins = [origin.strip()
+               for origin in origins_str.split(",") if origin.strip()]
+    return origins if origins else ["*"]
+
+
+cors_origins = parse_cors_origins(settings.BACKEND_CORS_ORIGINS)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
