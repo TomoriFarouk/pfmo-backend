@@ -5,6 +5,7 @@ from app.routers import auth, submissions, forms, dashboard, ai_insights
 from app.core.config import settings
 from app.models.user import User, UserRole
 from app.models.form import Form
+from app.models.submission import FormSubmission
 from app.core.security import get_password_hash
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -59,6 +60,7 @@ def root():
         "version": "1.0.0",
         "docs": "/docs"
     }
+
 
 @app.get("/health")
 def health_check():
@@ -141,6 +143,26 @@ async def startup_event():
         db.add(default_form)
         db.commit()
         print("✓ Default PFMO form created with schema")
+
+    # Fix sync status for existing submissions
+    # Since they're already on the server, they should be marked as synced
+    pending_submissions = db.query(FormSubmission).filter(
+        (FormSubmission.is_synced != True) | 
+        (FormSubmission.sync_status != "synced")
+    ).all()
+    
+    if pending_submissions:
+        updated_count = 0
+        for submission in pending_submissions:
+            submission.is_synced = True
+            submission.sync_status = "synced"
+            if not submission.synced_at:
+                submission.synced_at = datetime.utcnow()
+            submission.updated_at = datetime.utcnow()
+            updated_count += 1
+        
+        db.commit()
+        print(f"✓ Fixed sync status for {updated_count} existing submissions")
 
     db.close()
     print("✓ Database initialized successfully")

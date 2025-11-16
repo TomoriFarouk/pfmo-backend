@@ -196,3 +196,36 @@ def get_submission_stats(
         "pending_submissions": pending,
         "sync_percentage": round((synced / total * 100) if total > 0 else 0, 2)
     }
+
+
+@router.post("/fix-sync-status")
+def fix_sync_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
+):
+    """
+    Fix sync status for existing submissions.
+    Since they're already on the server, they should be marked as synced.
+    Admin only.
+    """
+    # Find all submissions that are not marked as synced
+    pending_submissions = db.query(FormSubmission).filter(
+        (FormSubmission.is_synced != True) | 
+        (FormSubmission.sync_status != "synced")
+    ).all()
+    
+    updated_count = 0
+    for submission in pending_submissions:
+        submission.is_synced = True
+        submission.sync_status = "synced"
+        if not submission.synced_at:
+            submission.synced_at = datetime.utcnow()
+        submission.updated_at = datetime.utcnow()
+        updated_count += 1
+    
+    db.commit()
+    
+    return {
+        "message": f"Updated {updated_count} submissions to synced status",
+        "updated_count": updated_count
+    }
