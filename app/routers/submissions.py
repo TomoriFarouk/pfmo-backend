@@ -28,6 +28,12 @@ async def submit_form(
     # Add collector ID
     submission_data["collector_id"] = current_user.id
     submission_data["raw_submission_data"] = submission_data.copy()
+    
+    # When submission is successfully received by server, mark it as synced
+    # This is because if it's on the server, it's successfully synced
+    submission_data["is_synced"] = True
+    submission_data["sync_status"] = "synced"
+    submission_data["synced_at"] = datetime.utcnow()
 
     db_submission = FormSubmission(
         **submission_data,
